@@ -1,0 +1,133 @@
+class Block {
+    /**
+     * Draw a single 12x12 tetromino block at the given location.
+     *
+     * `x` and `y` give the top-left corner of the block in pixels from the
+     * top-left corner of the screen.
+     *
+     * `style` gives the style of the block as an integer in the range 0-6.
+     *
+     * 0 = chessboard pattern
+     * 1 = nested square
+     * 2 = hash
+     * 3 = diagonal stripes
+     * 4 = circle
+     * 5 = plus
+     * 6 = cross
+     */
+    function void draw(int x, int y, int style) {
+        do Screen.drawRectangle(x + 1, y + 1, x + 11, y + 11);
+
+        // Chessboard
+        if (style = 0) {
+            do Screen.setColor(false);
+            do Screen.drawLine(x + 8, y + 3, x + 9, y + 4);
+            do Screen.drawLine(x + 6, y + 3, x + 9, y + 6);
+            do Screen.drawLine(x + 4, y + 3, x + 9, y + 8);
+            do Screen.drawLine(x + 3, y + 4, x + 8, y + 9);
+            do Screen.drawLine(x + 3, y + 6, x + 6, y + 9);
+            do Screen.drawLine(x + 3, y + 8, x + 4, y + 9);
+            do Screen.setColor(true);
+        }
+
+        // Nested square
+        if (style = 1) {
+            do Screen.setColor(false);
+            do Screen.drawLine(x + 4, y + 4, x + 8, y + 4);
+            do Screen.drawLine(x + 8, y + 5, x + 8, y + 8);
+            do Screen.drawLine(x + 4, y + 8, x + 7, y + 8);
+            do Screen.drawLine(x + 4, y + 5, x + 4, y + 7);
+            do Screen.setColor(true);
+            return;
+        }
+
+        // Hash
+        if (style = 2) {
+            do Screen.setColor(false);
+            do Screen.drawPixel(x + 3, y + 3);
+            do Screen.drawPixel(x + 3, y + 5);
+            do Screen.drawPixel(x + 3, y + 7);
+            do Screen.drawPixel(x + 3, y + 9);
+
+            do Screen.drawPixel(x + 5, y + 3);
+            do Screen.drawPixel(x + 5, y + 5);
+            do Screen.drawPixel(x + 5, y + 7);
+            do Screen.drawPixel(x + 5, y + 9);
+
+            do Screen.drawPixel(x + 7, y + 3);
+            do Screen.drawPixel(x + 7, y + 5);
+            do Screen.drawPixel(x + 7, y + 7);
+            do Screen.drawPixel(x + 7, y + 9);
+
+            do Screen.drawPixel(x + 9, y + 3);
+            do Screen.drawPixel(x + 9, y + 5);
+            do Screen.drawPixel(x + 9, y + 7);
+            do Screen.drawPixel(x + 9, y + 9);
+            do Screen.setColor(true);
+            return;
+        }
+
+        // Diagonal stripes
+        if (style = 3) {
+            do Screen.setColor(false);
+            do Screen.drawLine(x + 3, y + 3, x + 9, y + 9);
+            do Screen.drawLine(x + 6, y + 3, x + 9, y + 6);
+            do Screen.drawLine(x + 3, y + 6, x + 6, y + 9);
+            do Screen.drawPixel(x + 9, y + 3);
+            do Screen.drawPixel(x + 3, y + 9);
+            do Screen.setColor(true);
+            return;
+        }
+
+        // Circle
+        if (style = 4) {
+            do Screen.setColor(false);
+            do Screen.drawPixel(x + 3, y + 3);
+            do Screen.drawPixel(x + 4, y + 3);
+            do Screen.drawPixel(x + 3, y + 4);
+
+            do Screen.drawPixel(x + 8, y + 3);
+            do Screen.drawPixel(x + 9, y + 3);
+            do Screen.drawPixel(x + 9, y + 4);
+
+            do Screen.drawPixel(x + 3, y + 8);
+            do Screen.drawPixel(x + 3, y + 9);
+            do Screen.drawPixel(x + 4, y + 9);
+
+            do Screen.drawPixel(x + 8, y + 9);
+            do Screen.drawPixel(x + 9, y + 8);
+            do Screen.drawPixel(x + 9, y + 9);
+            do Screen.setColor(true);
+            return;
+        }
+
+        // Plus
+        if (style = 5) {
+            do Screen.setColor(false);
+            do Screen.drawPixel(x + 3, y + 3);
+            do Screen.drawPixel(x + 3, y + 9);
+            do Screen.drawPixel(x + 9, y + 3);
+            do Screen.drawPixel(x + 9, y + 9);
+            do Screen.setColor(true);
+            return;
+        }
+
+        // Cross
+        if (style = 6) {
+            do Screen.setColor(false);
+            do Screen.drawPixel(x + 6, y + 3);
+            do Screen.drawPixel(x + 3, y + 6);
+            do Screen.drawPixel(x + 9, y + 6);
+            do Screen.drawPixel(x + 6, y + 9);
+            return;
+        }
+        return;
+    }
+
+    function void erase(int x, int y) {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + 11, y + 11);
+        do Screen.setColor(true);
+        return;
+    }
+}
