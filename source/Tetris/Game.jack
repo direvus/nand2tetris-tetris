@@ -12,7 +12,7 @@ class Game {
         var char key;
         while (~exit) {
             do showTitleScreen();
-            let key = Game.recvKeyPress();
+            let key = Util.recvKeyPress();
 
             if ((key = 81) | (key = 113)) {
                 // Q or q
@@ -30,26 +30,21 @@ class Game {
     method void showTitleScreen() {
         do Screen.clearScreen();
         do Logo.draw(166, 16);
+
+        do Output.moveCursor(13, 1);
+        do Output.printString("Tetris (c) 1985-2025 Tetris Holding. Tetris logos, Tetris");
+        do Output.moveCursor(14, 1);
+        do Output.printString("theme song and Tetriminos are trademarks of Tetris Holding. The");
+        do Output.moveCursor(15, 1);
+        do Output.printString("Tetris trade dress is owned by Tetris Holding. Licensed to The");
+        do Output.moveCursor(16, 1);
+        do Output.printString("Tetris Company. Tetris Game Design by Alexey Pajitnov. Tetris");
+        do Output.moveCursor(17, 1);
+        do Output.printString("Logo Design by Roger Dean. All Rights Reserved.");
+
+        do Output.moveCursor(20, 16);
+        do Output.printString("Press [SPACE] to start the game!");
         return;
-    }
-
-    /** Receive a single key press event.
-     *
-     * This method will continue to sample the keyboard until the user has
-     * pressed a key and then released it. The function will then return the
-     * scan code of the key that was pressed.
-     */
-    function char recvKeyPress() {
-        var char key;
-        while (key = 0) {
-            let key = Keyboard.keyPressed();
-            do Sys.wait(1);
-        }
-
-        while (~(Keyboard.keyPressed() = 0)) {
-            do Sys.wait(1);
-        }
-        return key;
     }
 
     /** Play a round of Tetris.
