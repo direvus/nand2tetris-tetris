@@ -1,0 +1,37 @@
+class Random {
+    static int entropy;
+
+    function void init(int seed) {
+        let entropy = seed;
+        return;
+    }
+
+    /** Return an integer randomly selected from the range 0 - max.
+     */
+    function int randomInt(int max) {
+        var int result;
+        let result = Util.mod(entropy, max + 1);
+        let entropy = entropy + result;
+        return result;
+    }
+
+    /** Randomly rearrange the first `n` items of an array.
+     *
+     * The array is modified in place.
+     */
+    function void shuffle(Array a, int n) {
+        var int i, offset, temp;
+        while (i < n) {
+            // Select an element by its offset from the current position.
+            let offset = Random.randomInt((n - 1) - i);
+            if (offset > 0) {
+                // Swap the selected element into the current position.
+                let temp = a[i];
+                let a[i] = a[i + offset];
+                let a[i + offset] = temp;
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+}

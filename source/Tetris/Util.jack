@@ -1,20 +1,8 @@
 class Util {
-    /** Receive a single key press event.
-     *
-     * This method will continue to sample the keyboard until the user has
-     * pressed a key and then released it. The function will then return the
-     * scan code of the key that was pressed.
-     */
-    function char recvKeyPress() {
-        var char key;
-        while (key = 0) {
-            let key = Keyboard.keyPressed();
-            do Sys.wait(1);
-        }
-
-        while (~(Keyboard.keyPressed() = 0)) {
-            do Sys.wait(1);
-        }
-        return key;
+    /** Return the modulus of a % b. */
+    function int mod(int a, int b) {
+        var int quotient;
+        let quotient = a / b;
+        return a - (b * quotient);
     }
 }
