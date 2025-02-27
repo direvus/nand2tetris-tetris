@@ -1,10 +1,17 @@
 class Game {
-    field int left, top;
-    field int randomSeed;
+    field int left, top; // top-left coordinates of play area.
+    field int width, height, maxRow; // dimensions of matrix grid.
+    field int entropy;
+    field Queue queue;
+    field Matrix matrix;
 
     constructor Game new() {
         let left = 196;
         let top = 8;
+        let width = 10;
+        let height = 40;
+        let maxRow = 19;
+        do Random.init(1897);
         return this;
     }
 
@@ -20,6 +27,7 @@ class Game {
             }
 
             if (key = 32) { // Space
+                do Random.addEntropy(entropy);
                 // TODO do something with the score? Track a high score?
                 do play();
             }
@@ -40,14 +48,15 @@ class Game {
         var char key;
         while (key = 0) {
             let key = Keyboard.keyPressed();
-            let randomSeed = randomSeed + 1;
+            let entropy = entropy + 1;
             do Sys.wait(1);
         }
 
         while (~(Keyboard.keyPressed() = 0)) {
-            let randomSeed = randomSeed + 1;
+            let entropy = entropy + 1;
             do Sys.wait(1);
         }
+        let entropy = entropy - key;
         return key;
     }
 
@@ -71,37 +80,97 @@ class Game {
         return;
     }
 
+    method void drawBackground() {
+        do Screen.drawRectangle(left - 1, top - 1, left + 121, top + 201);
+        return;
+    }
+
     /** Play a round of Tetris.
      *
-     * Continue to run the game until the user either presses 'Q', or ends the
-     * game by topping out.
+     * Continue to run the game until the user either quits voluntarily by
+     * pressing 'Q', or triggers a game over condition.
      *
      * In either case, return the final score achieved in the round.
      */
     method int play() {
         var int score;
-        var boolean exit;
-        var char key;
-        var Array queue;
+        var boolean continue;
 
         do Screen.clearScreen();
-        do Random.init(randomSeed);
-        let queue = Array.new(7);
-        let queue[0] = 0;
-        let queue[1] = 1;
-        let queue[2] = 2;
-        let queue[3] = 3;
-        let queue[4] = 4;
-        let queue[5] = 5;
-        let queue[6] = 6;
-        do Random.shuffle(queue, 7);
+        do drawBackground();
+        let queue = Queue.new();
+        let matrix = Matrix.new(width, height);
+        let continue = true;
 
-        while (~exit) {
+        while (continue) {
+            let continue = step();
+            do Sys.wait(500);
         }
+
+        do queue.dispose();
+        do matrix.dispose();
         return score;
     }
 
+    /** Execute one game time step.
+     * 
+     * Return true if the game is still in play, or false if it's over.
+     */
+    method boolean step() {
+        var int type;
+        var Array piece;
+
+        let type = matrix.getActiveType();
+        if (type = 0) {
+            let type = 7;
+            //let type = queue.pop();
+            if (~matrix.addPiece(type)) {
+                return false;
+            }
+        }
+        let piece = matrix.getActiveCells();
+        do eraseBlock(piece[0]);
+        do eraseBlock(piece[1]);
+        do eraseBlock(piece[2]);
+        do eraseBlock(piece[3]);
+
+        do matrix.drop();
+        let piece = matrix.getActiveCells();
+
+        do drawBlock(piece[0], type);
+        do drawBlock(piece[1], type);
+        do drawBlock(piece[2], type);
+        do drawBlock(piece[3], type);
+
+        return true;
+    }
+
+    method void eraseBlock(int location) {
+        var int x, y, rows;
+        let rows = location / width;
+        if (rows > maxRow) {
+            return;
+        }
+        let y = top + ((maxRow - rows) * 12);
+        let x = left + ((location - (rows * width)) * 12);
+        do Block.erase(x, y);
+        return;
+    }
+
+    method void drawBlock(int location, int type) {
+        var int x, y, rows;
+        let rows = location / width;
+        if (rows > maxRow) {
+            return;
+        }
+        let y = top + ((maxRow - rows) * 12);
+        let x = left + ((location - (rows * width)) * 12);
+        do Block.draw(x, y, type);
+        return;
+    }
+
     method void dispose() {
+        do Memory.deAlloc(this);
         return;
     }
 }

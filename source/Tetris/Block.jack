@@ -1,25 +1,25 @@
 class Block {
     /**
-     * Draw a single 12x12 tetromino block at the given location.
+     * Draw a single 12x12 Mino at the given location.
      *
-     * `x` and `y` give the top-left corner of the block in pixels from the
+     * `x` and `y` give the top-left corner of the location, in pixels from the
      * top-left corner of the screen.
      *
-     * `style` gives the style of the block as an integer in the range 0-6.
+     * `style` gives the style of the block as an integer in the range 1-7.
      *
-     * 0 = chessboard pattern
-     * 1 = nested square
-     * 2 = hash
-     * 3 = diagonal stripes
-     * 4 = circle
-     * 5 = plus
-     * 6 = cross
+     * 1 = chessboard pattern
+     * 2 = nested square
+     * 3 = hash
+     * 4 = diagonal stripes
+     * 5 = circle
+     * 6 = plus
+     * 7 = cross
      */
     function void draw(int x, int y, int style) {
         do Screen.drawRectangle(x + 1, y + 1, x + 11, y + 11);
 
         // Chessboard
-        if (style = 0) {
+        if (style = 1) {
             do Screen.setColor(false);
             do Screen.drawLine(x + 8, y + 3, x + 9, y + 4);
             do Screen.drawLine(x + 6, y + 3, x + 9, y + 6);
@@ -31,7 +31,7 @@ class Block {
         }
 
         // Nested square
-        if (style = 1) {
+        if (style = 2) {
             do Screen.setColor(false);
             do Screen.drawLine(x + 4, y + 4, x + 8, y + 4);
             do Screen.drawLine(x + 8, y + 5, x + 8, y + 8);
@@ -42,7 +42,7 @@ class Block {
         }
 
         // Hash
-        if (style = 2) {
+        if (style = 3) {
             do Screen.setColor(false);
             do Screen.drawPixel(x + 3, y + 3);
             do Screen.drawPixel(x + 3, y + 5);
@@ -68,7 +68,7 @@ class Block {
         }
 
         // Diagonal stripes
-        if (style = 3) {
+        if (style = 4) {
             do Screen.setColor(false);
             do Screen.drawLine(x + 3, y + 3, x + 9, y + 9);
             do Screen.drawLine(x + 6, y + 3, x + 9, y + 6);
@@ -80,7 +80,7 @@ class Block {
         }
 
         // Circle
-        if (style = 4) {
+        if (style = 5) {
             do Screen.setColor(false);
             do Screen.drawPixel(x + 3, y + 3);
             do Screen.drawPixel(x + 4, y + 3);
@@ -102,7 +102,7 @@ class Block {
         }
 
         // Plus
-        if (style = 5) {
+        if (style = 6) {
             do Screen.setColor(false);
             do Screen.drawPixel(x + 3, y + 3);
             do Screen.drawPixel(x + 3, y + 9);
@@ -113,12 +113,13 @@ class Block {
         }
 
         // Cross
-        if (style = 6) {
+        if (style = 7) {
             do Screen.setColor(false);
             do Screen.drawPixel(x + 6, y + 3);
             do Screen.drawPixel(x + 3, y + 6);
             do Screen.drawPixel(x + 9, y + 6);
             do Screen.drawPixel(x + 6, y + 9);
+            do Screen.setColor(true);
             return;
         }
         return;

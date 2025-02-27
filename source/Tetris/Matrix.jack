@@ -1,0 +1,121 @@
+class Matrix {
+    field Array cells, activeCells;
+    field int width, height, activeType;
+
+    constructor Matrix new(int pWidth, int pHeight) {
+        let width = pWidth;
+        let height = pHeight;
+        let cells = Array.new(width * height);
+        let activeCells = Array.new(4);
+        return this;
+    }
+
+    /** Translate a (row, col) cell reference to an internal array index. */
+    method int cellRefToIndex(int row, int column) {
+        return (row * width) + column;
+    }
+
+    method int getActiveType() {
+        return activeType;
+    }
+
+    method Array getActiveCells() {
+        return activeCells;
+    }
+
+    /** Add a new Tetrimino to the matrix and return whether successful.
+     *
+     * If there are any existing blocks intersecting with the spawn position of
+     * the new piece, then it is a Block Out game over condition -- do nothing
+     * and return false.
+     *
+     * Otherwise, add the new piece to the matrix, make it the active piece,
+     * and return true.
+     */
+    method boolean addPiece(int type) {
+        var int base;
+        let base = 20 * width;
+
+        /* Determine where the new Tetrimino should spawn and record these
+         * positions in activeCells.
+         */
+        if (type = 1) { // O-type
+            let activeCells[0] = base + 4;
+            let activeCells[1] = base + 5;
+            let activeCells[2] = base + width + 4;
+            let activeCells[3] = base + width + 5;
+        }
+
+        if (type = 2) { // I-type
+            let activeCells[0] = base + 3;
+            let activeCells[1] = base + 4;
+            let activeCells[2] = base + 5;
+            let activeCells[3] = base + 6;
+        }
+
+        if (type = 3) { // T-type
+            let activeCells[0] = base + 3;
+            let activeCells[1] = base + 4;
+            let activeCells[2] = base + 5;
+            let activeCells[3] = base + width + 4;
+        }
+
+        if (type = 4) { // L-type
+            let activeCells[0] = base + 3;
+            let activeCells[1] = base + 4;
+            let activeCells[2] = base + 5;
+            let activeCells[3] = base + width + 5;
+        }
+
+        if (type = 5) { // J-type
+            let activeCells[0] = base + 3;
+            let activeCells[1] = base + 4;
+            let activeCells[2] = base + 5;
+            let activeCells[3] = base + width + 3;
+        }
+
+        if (type = 6) { // S-type
+            let activeCells[0] = base + 3;
+            let activeCells[1] = base + 4;
+            let activeCells[2] = base + width + 4;
+            let activeCells[3] = base + width + 5;
+        }
+
+        if (type = 7) { // Z-type
+            let activeCells[0] = base + 4;
+            let activeCells[1] = base + 5;
+            let activeCells[2] = base + width + 3;
+            let activeCells[3] = base + width + 4;
+        }
+
+        // Now we know where it should spawn, check for collisions.
+        if (~(
+                (cells[activeCells[0]] = 0) &
+                (cells[activeCells[1]] = 0) &
+                (cells[activeCells[2]] = 0) &
+                (cells[activeCells[3]] = 0))) {
+            // Block Out - game over
+            return false;
+        }
+
+        // The Tetrimino is safe to spawn, set the activeType and return true.
+        let activeType = type;
+        return true;
+    }
+
+    /** Drop the active piece down one row. */
+    method void drop() {
+        let activeCells[0] = activeCells[0] - 10;
+        let activeCells[1] = activeCells[1] - 10;
+        let activeCells[2] = activeCells[2] - 10;
+        let activeCells[3] = activeCells[3] - 10;
+        return;
+    }
+
+    method void dispose() {
+        do activeCells.dispose();
+        do cells.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

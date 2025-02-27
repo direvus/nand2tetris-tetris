@@ -6,6 +6,11 @@ class Random {
         return;
     }
 
+    function void addEntropy(int value) {
+        let entropy = entropy + value;
+        return;
+    }
+
     /** Return an integer randomly selected from the range 0 - max.
      */
     function int randomInt(int max) {

@@ -1,0 +1,69 @@
+/** The queue of tetriminos that will appear next */
+class Queue {
+    field Array array;
+    field int length;
+
+    constructor Queue new() {
+        let array = Array.new(14);  // up to 2 "bags" of 7 each
+        let length = 0;
+        do extend();
+        return this;
+    }
+
+    /** Add another bag, if needed to keep at least 7 items in the queue. */
+    method void extend() {
+        var Array bag;
+        var int i;
+
+        if (length > 6) {
+            // We already have enough items, do nothing.
+            return;
+        }
+
+        /* Create a new bag with 1 each of the 7 tetrimino types, shuffle it
+         * and append its items to the queue.
+         */
+        let bag = Array.new(7);
+        let bag[0] = 1;
+        let bag[1] = 2;
+        let bag[2] = 3;
+        let bag[3] = 4;
+        let bag[4] = 5;
+        let bag[5] = 6;
+        let bag[6] = 7;
+        do Random.shuffle(bag, 7);
+
+        while (i < 7) {
+            let array[length + i] = bag[i];
+            let i = i + 1;
+        }
+        let length = length + 7;
+        return;
+    }
+
+    /** Remove and return one item off the front of the queue. */
+    method int pop() {
+        var int i, result;
+        if (length < 1) {
+            // This should never happen, but let's be defensive.
+            return 0;
+        }
+        // Save the first element from the array, then shift all remaining
+        // elements back one array position and decrement the length. 
+        let result = array[0];
+        let i = 1;
+        while (i < length) {
+            let array[i - 1] = array[i];
+            let i = i + 1;
+        }
+        let length = length - 1;
+        do extend();
+        return result;
+    }
+
+    method void dispose() {
+        do array.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
