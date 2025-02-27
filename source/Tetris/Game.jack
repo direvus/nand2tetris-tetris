@@ -149,20 +149,30 @@ class Game {
                     let move = 1;
                 }
             }
+            if (key = 32) { // space
+                /* Do a "Hard Drop" -- immediately drop the piece down as far
+                 * as it can go, and then lock it down at that position.
+                 */
+                while (matrix.canDrop()) {
+                    let piece = matrix.getActiveCells();
+                    do erasePiece(piece);
+                    do matrix.drop();
+                    let piece = matrix.getActiveCells();
+                    do drawPiece(piece, type);
+                    do Sys.wait(20);
+                }
+                do lockPiece();
+                do Sys.wait(100);
+                return true;
+            }
             // TODO: rotation
-            // TODO: fast drop
+            // TODO: soft drop
             if (~(move = 0)) {
                 let piece = matrix.getActiveCells();
-                do eraseBlock(piece[0]);
-                do eraseBlock(piece[1]);
-                do eraseBlock(piece[2]);
-                do eraseBlock(piece[3]);
+                do erasePiece(piece);
                 do matrix.move(move);
                 let piece = matrix.getActiveCells();
-                do drawBlock(piece[0], type);
-                do drawBlock(piece[1], type);
-                do drawBlock(piece[2], type);
-                do drawBlock(piece[3], type);
+                do drawPiece(piece, type);
             }
             do Sys.wait(100);
             let i = i + 1;
@@ -171,27 +181,24 @@ class Game {
         if (matrix.canDrop()) {
             let locking = false;
             let piece = matrix.getActiveCells();
-            do eraseBlock(piece[0]);
-            do eraseBlock(piece[1]);
-            do eraseBlock(piece[2]);
-            do eraseBlock(piece[3]);
-
+            do erasePiece(piece);
             do matrix.drop();
             let piece = matrix.getActiveCells();
-
-            do drawBlock(piece[0], type);
-            do drawBlock(piece[1], type);
-            do drawBlock(piece[2], type);
-            do drawBlock(piece[3], type);
+            do drawPiece(piece, type);
         } else {
             if (locking) {
-                do matrix.lock();
-                // TODO: detect and clear complete lines
+                do lockPiece();
             } else {
                 let locking = true;
             }
         }
         return true;
+    }
+
+    method void lockPiece() {
+        do matrix.lock();
+        // TODO: detect and clear complete lines
+        return;
     }
 
     method void eraseBlock(int location) {
@@ -206,6 +213,14 @@ class Game {
         return;
     }
 
+    method void erasePiece(Array blocks) {
+        do eraseBlock(blocks[0]);
+        do eraseBlock(blocks[1]);
+        do eraseBlock(blocks[2]);
+        do eraseBlock(blocks[3]);
+        return;
+    }
+
     method void drawBlock(int location, int type) {
         var int x, y, rows;
         let rows = location / width;
@@ -215,6 +230,14 @@ class Game {
         let y = top + ((maxRow - rows) * 12);
         let x = left + ((location - (rows * width)) * 12);
         do Block.draw(x, y, type);
+        return;
+    }
+
+    method void drawPiece(Array blocks, int type) {
+        do drawBlock(blocks[0], type);
+        do drawBlock(blocks[1], type);
+        do drawBlock(blocks[2], type);
+        do drawBlock(blocks[3], type);
         return;
     }
 
