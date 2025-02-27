@@ -56,7 +56,6 @@ class Game {
             let entropy = entropy + 1;
             do Sys.wait(1);
         }
-        let entropy = entropy - key;
         return key;
     }
 
@@ -81,7 +80,10 @@ class Game {
     }
 
     method void drawBackground() {
-        do Screen.drawRectangle(left - 1, top - 1, left + 121, top + 201);
+        do Screen.drawRectangle(left - 1, top - 1, left + 121, top + 241);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(left, top, left + 120, top + 240);
+        do Screen.setColor(true);
         return;
     }
 
@@ -104,7 +106,6 @@ class Game {
 
         while (continue) {
             let continue = step();
-            do Sys.wait(500);
         }
 
         do queue.dispose();
@@ -117,30 +118,69 @@ class Game {
      * Return true if the game is still in play, or false if it's over.
      */
     method boolean step() {
-        var int type;
+        var int type, i, move;
+        var char key;
         var Array piece;
 
         let type = matrix.getActiveType();
         if (type = 0) {
-            let type = 7;
-            //let type = queue.pop();
+            let type = queue.pop();
             if (~matrix.addPiece(type)) {
+                // If addPiece returned false, it was unable to spawn so that's
+                // game over.
                 return false;
             }
         }
-        let piece = matrix.getActiveCells();
-        do eraseBlock(piece[0]);
-        do eraseBlock(piece[1]);
-        do eraseBlock(piece[2]);
-        do eraseBlock(piece[3]);
 
-        do matrix.drop();
-        let piece = matrix.getActiveCells();
+        let i = 0;
+        while (i < 5) {
+            let key = Keyboard.keyPressed();
+            let move = 0;
 
-        do drawBlock(piece[0], type);
-        do drawBlock(piece[1], type);
-        do drawBlock(piece[2], type);
-        do drawBlock(piece[3], type);
+            if (key = 130) { // left arrow
+                if (matrix.canMoveLeft()) {
+                    let move = -1;
+                }
+            }
+            if (key = 132) { // right arrow
+                if (matrix.canMoveRight()) {
+                    let move = 1;
+                }
+            }
+            if (~(move = 0)) {
+                let piece = matrix.getActiveCells();
+                do eraseBlock(piece[0]);
+                do eraseBlock(piece[1]);
+                do eraseBlock(piece[2]);
+                do eraseBlock(piece[3]);
+                do matrix.move(move);
+                let piece = matrix.getActiveCells();
+                do drawBlock(piece[0], type);
+                do drawBlock(piece[1], type);
+                do drawBlock(piece[2], type);
+                do drawBlock(piece[3], type);
+            }
+            do Sys.wait(100);
+            let i = i + 1;
+        }
+
+        if (matrix.canDrop()) {
+            let piece = matrix.getActiveCells();
+            do eraseBlock(piece[0]);
+            do eraseBlock(piece[1]);
+            do eraseBlock(piece[2]);
+            do eraseBlock(piece[3]);
+
+            do matrix.drop();
+            let piece = matrix.getActiveCells();
+
+            do drawBlock(piece[0], type);
+            do drawBlock(piece[1], type);
+            do drawBlock(piece[2], type);
+            do drawBlock(piece[3], type);
+        } else {
+            // TODO lock-in
+        }
 
         return true;
     }

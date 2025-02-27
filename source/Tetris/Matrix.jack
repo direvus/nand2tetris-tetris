@@ -89,11 +89,11 @@ class Matrix {
         }
 
         // Now we know where it should spawn, check for collisions.
-        if (~(
-                (cells[activeCells[0]] = 0) &
-                (cells[activeCells[1]] = 0) &
-                (cells[activeCells[2]] = 0) &
-                (cells[activeCells[3]] = 0))) {
+        if (~(isClear(
+                activeCells[0],
+                activeCells[1],
+                activeCells[2],
+                activeCells[3]))) {
             // Block Out - game over
             return false;
         }
@@ -103,12 +103,76 @@ class Matrix {
         return true;
     }
 
+    /** Return whether all the given indexes are empty. */
+    method boolean isClear(int a, int b, int c, int d) {
+        return (
+                (cells[a] = 0) &
+                (cells[b] = 0) &
+                (cells[c] = 0) &
+                (cells[d] = 0));
+    }
+
+    /** Return whether the active piece has space to move. */
+    method boolean canMove(int v) {
+        return isClear(
+                activeCells[0] + v,
+                activeCells[1] + v,
+                activeCells[2] + v,
+                activeCells[3] + v);
+    }
+
+    /** Return whether the active piece has space to move left. */
+    method boolean canMoveLeft() {
+        // Check that none of the blocks are up against the left wall.
+        if (
+                (Util.mod(activeCells[0], width) = 0) |
+                (Util.mod(activeCells[1], width) = 0) |
+                (Util.mod(activeCells[2], width) = 0) |
+                (Util.mod(activeCells[3], width) = 0)) {
+            return false;
+        }
+        return canMove(-1);
+    }
+
+    /** Return whether the active piece has space to move right. */
+    method boolean canMoveRight() {
+        // Check that none of the blocks are up against the right wall.
+        var int wall;
+        let wall = width - 1;
+        if (
+                (Util.mod(activeCells[0], width) = wall) |
+                (Util.mod(activeCells[1], width) = wall) |
+                (Util.mod(activeCells[2], width) = wall) |
+                (Util.mod(activeCells[3], width) = wall)) {
+            return false;
+        }
+        return canMove(-1);
+    }
+
+    /** Return whether the active piece has space to drop down. */
+    method boolean canDrop() {
+        // Check that none of the blocks are on the floor.
+        if (
+                (activeCells[0] < width) |
+                (activeCells[1] < width) |
+                (activeCells[2] < width) |
+                (activeCells[3] < width)) {
+            return false;
+        }
+        return canMove(-10);
+    }
+
+    method void move(int v) {
+        let activeCells[0] = activeCells[0] + v;
+        let activeCells[1] = activeCells[1] + v;
+        let activeCells[2] = activeCells[2] + v;
+        let activeCells[3] = activeCells[3] + v;
+        return;
+    }
+
     /** Drop the active piece down one row. */
     method void drop() {
-        let activeCells[0] = activeCells[0] - 10;
-        let activeCells[1] = activeCells[1] - 10;
-        let activeCells[2] = activeCells[2] - 10;
-        let activeCells[3] = activeCells[3] - 10;
+        do move(-10);
         return;
     }
 
