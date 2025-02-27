@@ -176,6 +176,16 @@ class Matrix {
         return;
     }
 
+    /** Lock the active piece in place. */
+    method void lock() {
+        let cells[activeCells[0]] = activeType;
+        let cells[activeCells[1]] = activeType;
+        let cells[activeCells[2]] = activeType;
+        let cells[activeCells[3]] = activeType;
+        let activeType = 0;
+        return;
+    }
+
     method void dispose() {
         do activeCells.dispose();
         do cells.dispose();
