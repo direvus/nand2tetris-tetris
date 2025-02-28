@@ -1,13 +1,210 @@
 class Matrix {
-    field Array cells, activeCells;
-    field int width, height, activeType;
+    field Array cells, activeCells, targetCells, ROTATIONS, KICKS;
+    field int width, height, activeType, orientation, targetOrientation;
 
     constructor Matrix new(int pWidth, int pHeight) {
         let width = pWidth;
         let height = pHeight;
         let cells = Array.new(width * height);
         let activeCells = Array.new(4);
+        let targetCells = Array.new(4);
+
+        do initRotations();
         return this;
+    }
+
+    /** Set up the table of rotations.
+     *
+     * Each Tetrimino type has 4 possible orientations, beginning with the
+     * spawn orientation at 0 and rotating clockwise 90 degrees through to
+     * orientation 3. Each orientation consists of 4 grid locations, relative
+     * to the top-left corner of the piece's bounding box.
+     */
+    method void initRotations() {
+        let ROTATIONS = Array.new(7 * 4 * 4);
+        /* O-type -- all orientations are the same
+         *
+         * .##.
+         * .##.
+         */
+        let ROTATIONS[0] = 1;
+        let ROTATIONS[1] = 2;
+        let ROTATIONS[2] = -9;
+        let ROTATIONS[3] = -8;
+
+        let ROTATIONS[4] = 1;
+        let ROTATIONS[5] = 2;
+        let ROTATIONS[6] = -9;
+        let ROTATIONS[7] = -8;
+
+        let ROTATIONS[8] = 1;
+        let ROTATIONS[9] = 2;
+        let ROTATIONS[10] = -9;
+        let ROTATIONS[11] = -8;
+
+        let ROTATIONS[12] = 1;
+        let ROTATIONS[13] = 2;
+        let ROTATIONS[14] = -9;
+        let ROTATIONS[15] = -8;
+
+        /* I-type
+         *
+         * ....  ..#.  ....  .#..
+         * ####  ..#.  ....  .#..
+         * ....  ..#.  ####  .#..
+         * ....  ..#.  ....  .#..
+         */
+        let ROTATIONS[16] = -10;
+        let ROTATIONS[17] = -9;
+        let ROTATIONS[18] = -8;
+        let ROTATIONS[19] = -7;
+
+        let ROTATIONS[20] = 2;
+        let ROTATIONS[21] = -8;
+        let ROTATIONS[22] = -18;
+        let ROTATIONS[23] = -28;
+
+        let ROTATIONS[24] = -20;
+        let ROTATIONS[25] = -19;
+        let ROTATIONS[26] = -18;
+        let ROTATIONS[27] = -17;
+
+        let ROTATIONS[28] = 1;
+        let ROTATIONS[29] = -9;
+        let ROTATIONS[30] = -19;
+        let ROTATIONS[31] = -29;
+
+        /* T-type
+         *
+         * .#.  .#.  ...  .#.
+         * ###  .##  ###  ##.
+         * ...  .#.  .#.  .#.
+         */
+        let ROTATIONS[32] = 1;
+        let ROTATIONS[33] = -10;
+        let ROTATIONS[34] = -9;
+        let ROTATIONS[35] = -8;
+
+        let ROTATIONS[36] = 1;
+        let ROTATIONS[37] = -9;
+        let ROTATIONS[38] = -8;
+        let ROTATIONS[39] = -19;
+
+        let ROTATIONS[40] = -10;
+        let ROTATIONS[41] = -9;
+        let ROTATIONS[42] = -8;
+        let ROTATIONS[43] = -19;
+
+        let ROTATIONS[44] = 1;
+        let ROTATIONS[45] = -10;
+        let ROTATIONS[46] = -9;
+        let ROTATIONS[47] = -19;
+
+        /* L-type
+         *
+         * ..#  .#.  ...  ##.
+         * ###  .#.  ###  .#.
+         * ...  .##  #..  .#.
+         */
+        let ROTATIONS[48] = 2;
+        let ROTATIONS[49] = -10;
+        let ROTATIONS[50] = -9;
+        let ROTATIONS[51] = -8;
+
+        let ROTATIONS[52] = 1;
+        let ROTATIONS[53] = -9;
+        let ROTATIONS[54] = -19;
+        let ROTATIONS[55] = -18;
+
+        let ROTATIONS[56] = -10;
+        let ROTATIONS[57] = -9;
+        let ROTATIONS[58] = -8;
+        let ROTATIONS[59] = -20;
+
+        let ROTATIONS[60] = 0;
+        let ROTATIONS[61] = 1;
+        let ROTATIONS[62] = -9;
+        let ROTATIONS[63] = -19;
+
+        /* J-type
+         *
+         * #..  .##  ...  .#.
+         * ###  .#.  ###  .#.
+         * ...  .#.  ..#  ##.
+         */
+        let ROTATIONS[64] = 0;
+        let ROTATIONS[65] = -10;
+        let ROTATIONS[66] = -9;
+        let ROTATIONS[67] = -8;
+
+        let ROTATIONS[68] = 1;
+        let ROTATIONS[69] = 2;
+        let ROTATIONS[70] = -9;
+        let ROTATIONS[71] = -19;
+
+        let ROTATIONS[72] = -10;
+        let ROTATIONS[73] = -9;
+        let ROTATIONS[74] = -8;
+        let ROTATIONS[75] = -18;
+
+        let ROTATIONS[76] = 1;
+        let ROTATIONS[77] = -9;
+        let ROTATIONS[78] = -20;
+        let ROTATIONS[79] = -19;
+
+        /* S-type
+         *
+         * .##  .#.  ...  #..
+         * ##.  .##  .##  ##.
+         * ...  ..#  ##.  .#.
+         */
+        let ROTATIONS[80] = 1;
+        let ROTATIONS[81] = 2;
+        let ROTATIONS[82] = -10;
+        let ROTATIONS[83] = -9;
+
+        let ROTATIONS[84] = 1;
+        let ROTATIONS[85] = -9;
+        let ROTATIONS[86] = -8;
+        let ROTATIONS[87] = -18;
+
+        let ROTATIONS[88] = -9;
+        let ROTATIONS[89] = -8;
+        let ROTATIONS[90] = -20;
+        let ROTATIONS[91] = -19;
+
+        let ROTATIONS[92] = 0;
+        let ROTATIONS[93] = -10;
+        let ROTATIONS[94] = -9;
+        let ROTATIONS[95] = -19;
+
+        /* Z-type
+         *
+         * ##.  ..#  ...  .#.
+         * .##  .##  ##.  ##.
+         * ...  .#.  .##  #..
+         */
+        let ROTATIONS[96] = 0;
+        let ROTATIONS[97] = 1;
+        let ROTATIONS[98] = -9;
+        let ROTATIONS[99] = -8;
+
+        let ROTATIONS[100] = 2;
+        let ROTATIONS[101] = -9;
+        let ROTATIONS[102] = -8;
+        let ROTATIONS[103] = -19;
+
+        let ROTATIONS[104] = -10;
+        let ROTATIONS[105] = -9;
+        let ROTATIONS[106] = -19;
+        let ROTATIONS[107] = -18;
+
+        let ROTATIONS[108] = 1;
+        let ROTATIONS[109] = -10;
+        let ROTATIONS[110] = -9;
+        let ROTATIONS[111] = -20;
+
+        return;
     }
 
     /** Translate a (row, col) cell reference to an internal array index. */
@@ -33,73 +230,35 @@ class Matrix {
      * and return true.
      */
     method boolean addPiece(int type) {
-        var int base;
-        let base = 20 * width;
+        var int i, base;
+        let base = 214;
 
-        /* Determine where the new Tetrimino should spawn and record these
-         * positions in activeCells.
+        // The spawn position is shifted 1 column left for O and I types.
+        if ((type = 1) | (type = 2)) {
+            let base = base - 1;
+        }
+
+        /* Determine where the new minos should spawn and record these
+         * positions in targetCells. New pieces always spawn with orientation
+         * 0.
          */
-        if (type = 1) { // O-type
-            let activeCells[0] = base + 4;
-            let activeCells[1] = base + 5;
-            let activeCells[2] = base + width + 4;
-            let activeCells[3] = base + width + 5;
-        }
-
-        if (type = 2) { // I-type
-            let activeCells[0] = base + 3;
-            let activeCells[1] = base + 4;
-            let activeCells[2] = base + 5;
-            let activeCells[3] = base + 6;
-        }
-
-        if (type = 3) { // T-type
-            let activeCells[0] = base + 3;
-            let activeCells[1] = base + 4;
-            let activeCells[2] = base + 5;
-            let activeCells[3] = base + width + 4;
-        }
-
-        if (type = 4) { // L-type
-            let activeCells[0] = base + 3;
-            let activeCells[1] = base + 4;
-            let activeCells[2] = base + 5;
-            let activeCells[3] = base + width + 5;
-        }
-
-        if (type = 5) { // J-type
-            let activeCells[0] = base + 3;
-            let activeCells[1] = base + 4;
-            let activeCells[2] = base + 5;
-            let activeCells[3] = base + width + 3;
-        }
-
-        if (type = 6) { // S-type
-            let activeCells[0] = base + 3;
-            let activeCells[1] = base + 4;
-            let activeCells[2] = base + width + 4;
-            let activeCells[3] = base + width + 5;
-        }
-
-        if (type = 7) { // Z-type
-            let activeCells[0] = base + 4;
-            let activeCells[1] = base + 5;
-            let activeCells[2] = base + width + 3;
-            let activeCells[3] = base + width + 4;
-        }
+        let i = (type - 1) * 16;
+        let activeCells[0] = base + ROTATIONS[i];
+        let activeCells[1] = base + ROTATIONS[i + 1];
+        let activeCells[2] = base + ROTATIONS[i + 2];
+        let activeCells[3] = base + ROTATIONS[i + 3];
 
         // Now we know where it should spawn, check for collisions.
         if (~(isClear(
-                activeCells[0],
-                activeCells[1],
-                activeCells[2],
-                activeCells[3]))) {
-            // Block Out - game over
+                activeCells[0], activeCells[1],
+                activeCells[2], activeCells[3]))) {
+            // Block Out condition: Game Over
             return false;
         }
 
-        // The Tetrimino is safe to spawn, set the activeType and return true.
+        // The Tetrimino is clear to spawn, do it.
         let activeType = type;
+        let orientation = 0;
         return true;
     }
 
@@ -162,6 +321,45 @@ class Matrix {
         return canMove(-10);
     }
 
+    /** Return whether the active piece has space to rotate.
+     *
+     * We first check whether the piece can be rotated in-place. If not, we
+     * then check a series of 4 alternative "kick" positions. The first valid
+     * position is selected, and recorded internally.
+     *
+     * If no valid position is found, return false.
+     */
+    method boolean prepareRotate(boolean clockwise) {
+        if (activeType = 1) {
+            // O-Tetriminos do not rotate; do nothing and return false
+            return false;
+        }
+        if (clockwise) {
+            if (orientation = 3) {
+                let targetOrientation = 0;
+            } else {
+                let targetOrientation = orientation + 1;
+            }
+        } else {
+            if (orientation = 0) {
+                let targetOrientation = 3;
+            } else {
+                let targetOrientation = orientation - 1;
+            }
+        }
+        return false;
+    }
+
+    /** Commit the rotation previously set up by canRotate(). */
+    method void rotate() {
+        let activeCells[0] = targetCells[0];
+        let activeCells[1] = targetCells[1];
+        let activeCells[2] = targetCells[2];
+        let activeCells[3] = targetCells[3];
+        let orientation = targetOrientation;
+        return;
+    }
+
     method void move(int v) {
         let activeCells[0] = activeCells[0] + v;
         let activeCells[1] = activeCells[1] + v;
@@ -188,7 +386,9 @@ class Matrix {
 
     method void dispose() {
         do activeCells.dispose();
+        do targetCells.dispose();
         do cells.dispose();
+        do ROTATIONS.dispose();
         do Memory.deAlloc(this);
         return;
     }
