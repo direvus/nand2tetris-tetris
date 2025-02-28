@@ -11,6 +11,7 @@ class Matrix {
         let targetCells = Array.new(4);
 
         do initRotations();
+        do initKicks();
         return this;
     }
 
@@ -208,6 +209,116 @@ class Matrix {
         return;
     }
 
+    /** Set up the tables of kick positions.
+     *
+     * For each possible starting orientation and rotation, there are 4
+     * alternative kick positions to consider, when the original position is
+     * not available.
+     *
+     * J, L, T, S and Z types all share the same set of kick positions, I-type
+     * has its own set of kick positions, and O-type does not rotate so it has
+     * no kicks.
+     *
+     * The kick tables are organised first by type group (32 cells per group,
+     * main group followed by I-type), then by starting orientation (8 cells
+     * per orientation) and then by the direction of rotation (4 cells per
+     * direction), clockwise first.
+     */
+    method void initKicks() {
+        let KICKS = Array.new(8 * 4 * 2);
+        // J, L, T, S and Z type group
+        // 0 -> 1
+        let KICKS[0] = -1;
+        let KICKS[1] = 9;
+        let KICKS[2] = -20;
+        let KICKS[3] = -21;
+        // 0 -> 3
+        let KICKS[4] = 1;
+        let KICKS[5] = 11;
+        let KICKS[6] = -20;
+        let KICKS[7] = -19;
+
+        // 1 -> 2
+        let KICKS[8] = 1;
+        let KICKS[9] = -9;
+        let KICKS[10] = 20;
+        let KICKS[11] = 21;
+        // 1 -> 0
+        let KICKS[12] = 1;
+        let KICKS[13] = -9;
+        let KICKS[14] = 20;
+        let KICKS[15] = 21;
+
+        // 2 -> 3
+        let KICKS[16] = 1;
+        let KICKS[17] = 11;
+        let KICKS[18] = -20;
+        let KICKS[19] = -19;
+        // 2 -> 1
+        let KICKS[20] = -1;
+        let KICKS[21] = 9;
+        let KICKS[22] = -20;
+        let KICKS[23] = -21;
+
+        // 3 -> 0
+        let KICKS[24] = -1;
+        let KICKS[25] = -11;
+        let KICKS[26] = 20;
+        let KICKS[27] = 19;
+        // 3 -> 2
+        let KICKS[28] = -1;
+        let KICKS[29] = -11;
+        let KICKS[30] = 20;
+        let KICKS[31] = 19;
+
+        // I-type group
+        // 0 -> 1
+        let KICKS[32] = -2;
+        let KICKS[33] = 1;
+        let KICKS[34] = -12;
+        let KICKS[35] = 21;
+        // 0 -> 3
+        let KICKS[36] = -1;
+        let KICKS[37] = 2;
+        let KICKS[38] = 19;
+        let KICKS[39] = -8;
+
+        // 1 -> 2
+        let KICKS[40] = -1;
+        let KICKS[41] = 2;
+        let KICKS[42] = 19;
+        let KICKS[43] = -8;
+        // 1 -> 0
+        let KICKS[44] = 2;
+        let KICKS[45] = -1;
+        let KICKS[46] = 12;
+        let KICKS[47] = -21;
+
+        // 2 -> 3
+        let KICKS[48] = 2;
+        let KICKS[49] = -1;
+        let KICKS[50] = 12;
+        let KICKS[51] = -21;
+        // 2 -> 1
+        let KICKS[52] = 1;
+        let KICKS[53] = -2;
+        let KICKS[54] = -19;
+        let KICKS[55] = 8;
+
+        // 3 -> 0
+        let KICKS[56] = 1;
+        let KICKS[57] = -2;
+        let KICKS[58] = -19;
+        let KICKS[59] = 8;
+        // 3 -> 2
+        let KICKS[60] = -2;
+        let KICKS[61] = 1;
+        let KICKS[62] = -12;
+        let KICKS[63] = 21;
+
+        return;
+    }
+
     /** Translate a (row, col) cell reference to an internal array index. */
     method int cellRefToIndex(int row, int column) {
         return (row * WIDTH) + column;
@@ -332,7 +443,7 @@ class Matrix {
      * If no valid position is found, return false.
      */
     method boolean prepareRotate(boolean clockwise) {
-        var int i;
+        var int a, b, c, d, i, j, v;
 
         if (activeType = 1) {
             // O-Tetriminos do not rotate; do nothing and return false
@@ -359,6 +470,34 @@ class Matrix {
 
         if (isTargetValid()) {
             return true;
+        }
+
+        // The basic position didn't work out, so let's try the kicks.
+        let a = targetCells[0];
+        let b = targetCells[1];
+        let c = targetCells[2];
+        let d = targetCells[3];
+
+        let i = (orientation * 8);
+        if (activeType = 2) {
+            // I-type
+            let i = i + 32;
+        }
+        if (~clockwise) {
+            let i = i + 4;
+        }
+
+        while (j < 4) {
+            let v = KICKS[i + j];
+            let targetCells[0] = a + v;
+            let targetCells[1] = b + v;
+            let targetCells[2] = c + v;
+            let targetCells[3] = d + v;
+
+            if (isTargetValid()) {
+                return true;
+            }
+            let j = j + 1;
         }
         return false;
     }
@@ -440,6 +579,7 @@ class Matrix {
         do targetCells.dispose();
         do lockedCells.dispose();
         do ROTATIONS.dispose();
+        do KICKS.dispose();
         do Memory.deAlloc(this);
         return;
     }
