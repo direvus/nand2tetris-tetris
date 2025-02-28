@@ -106,8 +106,11 @@ class Game {
         let y = top + 13;
         let type = queue.get(0);
 
+        // Minor adjustments to center pieces in the circle.
+        if (type = 1) {
+            let x = x - 7;
+        }
         if (type = 2) {
-            // minor adjustments to center I-type in the circle.
             let x = x - 7;
             let y = y - 6;
         }
