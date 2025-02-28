@@ -102,7 +102,7 @@ class Game {
         do Screen.clearScreen();
         do drawBackground();
         let queue = Queue.new();
-        let matrix = Matrix.new(width, height);
+        let matrix = Matrix.new();
         let continue = true;
         let locking = false;
 
@@ -149,6 +149,20 @@ class Game {
                     let move = 1;
                 }
             }
+            if ((key = 88) | (key = 120)) { // X or x
+                if (matrix.prepareRotate(true)) {
+                    do erasePiece(matrix.getActiveCells());
+                    do matrix.rotate();
+                    do drawPiece(matrix.getActiveCells(), type);
+                }
+            }
+            if ((key = 90) | (key = 122)) { // Z or z
+                if (matrix.prepareRotate(false)) {
+                    do erasePiece(matrix.getActiveCells());
+                    do matrix.rotate();
+                    do drawPiece(matrix.getActiveCells(), type);
+                }
+            }
             if (key = 32) { // space
                 /* Do a "Hard Drop" -- immediately drop the piece down as far
                  * as it can go, and then lock it down at that position.
@@ -165,7 +179,6 @@ class Game {
                 do Sys.wait(100);
                 return true;
             }
-            // TODO: rotation
             // TODO: soft drop
             if (~(move = 0)) {
                 let piece = matrix.getActiveCells();

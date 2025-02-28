@@ -71,10 +71,16 @@ class Block {
         if (style = 4) {
             do Screen.setColor(false);
             do Screen.drawLine(x + 3, y + 3, x + 9, y + 9);
-            do Screen.drawLine(x + 6, y + 3, x + 9, y + 6);
-            do Screen.drawLine(x + 3, y + 6, x + 6, y + 9);
+            do Screen.drawLine(x + 4, y + 3, x + 9, y + 8);
+            do Screen.drawLine(x + 3, y + 4, x + 8, y + 9);
+
+            do Screen.drawPixel(x + 8, y + 3);
             do Screen.drawPixel(x + 9, y + 3);
+            do Screen.drawPixel(x + 9, y + 4);
+
+            do Screen.drawPixel(x + 3, y + 8);
             do Screen.drawPixel(x + 3, y + 9);
+            do Screen.drawPixel(x + 4, y + 9);
             do Screen.setColor(true);
             return;
         }

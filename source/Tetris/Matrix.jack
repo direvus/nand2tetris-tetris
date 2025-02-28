@@ -1,11 +1,12 @@
 class Matrix {
-    field Array cells, activeCells, targetCells, ROTATIONS, KICKS;
-    field int width, height, activeType, orientation, targetOrientation;
+    field Array lockedCells, activeCells, targetCells, ROTATIONS, KICKS;
+    field int WIDTH, HEIGHT, location, activeType,
+            orientation, targetOrientation;
 
-    constructor Matrix new(int pWidth, int pHeight) {
-        let width = pWidth;
-        let height = pHeight;
-        let cells = Array.new(width * height);
+    constructor Matrix new() {
+        let WIDTH = 10;
+        let HEIGHT = 40;
+        let lockedCells = Array.new(WIDTH * HEIGHT);
         let activeCells = Array.new(4);
         let targetCells = Array.new(4);
 
@@ -209,7 +210,7 @@ class Matrix {
 
     /** Translate a (row, col) cell reference to an internal array index. */
     method int cellRefToIndex(int row, int column) {
-        return (row * width) + column;
+        return (row * WIDTH) + column;
     }
 
     method int getActiveType() {
@@ -257,6 +258,7 @@ class Matrix {
         }
 
         // The Tetrimino is clear to spawn, do it.
+        let location = base;
         let activeType = type;
         let orientation = 0;
         return true;
@@ -265,10 +267,10 @@ class Matrix {
     /** Return whether all the given indexes are empty. */
     method boolean isClear(int a, int b, int c, int d) {
         return (
-                (cells[a] = 0) &
-                (cells[b] = 0) &
-                (cells[c] = 0) &
-                (cells[d] = 0));
+                (lockedCells[a] = 0) &
+                (lockedCells[b] = 0) &
+                (lockedCells[c] = 0) &
+                (lockedCells[d] = 0));
     }
 
     /** Return whether the active piece has space to move. */
@@ -282,12 +284,12 @@ class Matrix {
 
     /** Return whether the active piece has space to move left. */
     method boolean canMoveLeft() {
-        // Check that none of the blocks are up against the left wall.
+        // Check that none of the minos are up against the left wall.
         if (
-                (Util.mod(activeCells[0], width) = 0) |
-                (Util.mod(activeCells[1], width) = 0) |
-                (Util.mod(activeCells[2], width) = 0) |
-                (Util.mod(activeCells[3], width) = 0)) {
+                (Util.mod(activeCells[0], WIDTH) = 0) |
+                (Util.mod(activeCells[1], WIDTH) = 0) |
+                (Util.mod(activeCells[2], WIDTH) = 0) |
+                (Util.mod(activeCells[3], WIDTH) = 0)) {
             return false;
         }
         return canMove(-1);
@@ -295,14 +297,14 @@ class Matrix {
 
     /** Return whether the active piece has space to move right. */
     method boolean canMoveRight() {
-        // Check that none of the blocks are up against the right wall.
+        // Check that none of the minos are up against the right wall.
         var int wall;
-        let wall = width - 1;
+        let wall = WIDTH - 1;
         if (
-                (Util.mod(activeCells[0], width) = wall) |
-                (Util.mod(activeCells[1], width) = wall) |
-                (Util.mod(activeCells[2], width) = wall) |
-                (Util.mod(activeCells[3], width) = wall)) {
+                (Util.mod(activeCells[0], WIDTH) = wall) |
+                (Util.mod(activeCells[1], WIDTH) = wall) |
+                (Util.mod(activeCells[2], WIDTH) = wall) |
+                (Util.mod(activeCells[3], WIDTH) = wall)) {
             return false;
         }
         return canMove(-1);
@@ -312,10 +314,10 @@ class Matrix {
     method boolean canDrop() {
         // Check that none of the blocks are on the floor.
         if (
-                (activeCells[0] < width) |
-                (activeCells[1] < width) |
-                (activeCells[2] < width) |
-                (activeCells[3] < width)) {
+                (activeCells[0] < WIDTH) |
+                (activeCells[1] < WIDTH) |
+                (activeCells[2] < WIDTH) |
+                (activeCells[3] < WIDTH)) {
             return false;
         }
         return canMove(-10);
@@ -330,6 +332,8 @@ class Matrix {
      * If no valid position is found, return false.
      */
     method boolean prepareRotate(boolean clockwise) {
+        var int i;
+
         if (activeType = 1) {
             // O-Tetriminos do not rotate; do nothing and return false
             return false;
@@ -347,6 +351,17 @@ class Matrix {
                 let targetOrientation = orientation - 1;
             }
         }
+        let i = ((activeType - 1) * 16) + (targetOrientation * 4);
+        let targetCells[0] = location + ROTATIONS[i];
+        let targetCells[1] = location + ROTATIONS[i + 1];
+        let targetCells[2] = location + ROTATIONS[i + 2];
+        let targetCells[3] = location + ROTATIONS[i + 3];
+
+        return isClear(
+                targetCells[0], targetCells[1],
+                targetCells[2], targetCells[3]);
+        // TODO: check whether rotation would hit a wall.
+
         return false;
     }
 
@@ -365,6 +380,7 @@ class Matrix {
         let activeCells[1] = activeCells[1] + v;
         let activeCells[2] = activeCells[2] + v;
         let activeCells[3] = activeCells[3] + v;
+        let location = location + v;
         return;
     }
 
@@ -376,10 +392,10 @@ class Matrix {
 
     /** Lock the active piece in place. */
     method void lock() {
-        let cells[activeCells[0]] = activeType;
-        let cells[activeCells[1]] = activeType;
-        let cells[activeCells[2]] = activeType;
-        let cells[activeCells[3]] = activeType;
+        let lockedCells[activeCells[0]] = activeType;
+        let lockedCells[activeCells[1]] = activeType;
+        let lockedCells[activeCells[2]] = activeType;
+        let lockedCells[activeCells[3]] = activeType;
         let activeType = 0;
         return;
     }
@@ -387,7 +403,7 @@ class Matrix {
     method void dispose() {
         do activeCells.dispose();
         do targetCells.dispose();
-        do cells.dispose();
+        do lockedCells.dispose();
         do ROTATIONS.dispose();
         do Memory.deAlloc(this);
         return;
