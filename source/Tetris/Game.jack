@@ -82,9 +82,47 @@ class Game {
 
     method void drawBackground() {
         do Screen.drawRectangle(left - 1, top - 1, left + 121, top + 241);
+        do Screen.drawRectangle(left + 128, top + 52, left + 178, top + 241);
+        do Screen.drawCircle(left + 152, top + 25, 25);
+
         do Screen.setColor(false);
         do Screen.drawRectangle(left, top, left + 120, top + 240);
+        do Screen.drawRectangle(left + 129, top + 53, left + 177, top + 240);
+        do Screen.drawCircle(left + 152, top + 25, 24);
+
         do Screen.setColor(true);
+        return;
+    }
+
+    method void drawQueue() {
+        var int i, x, y, type;
+        do Screen.setColor(false);
+        do Screen.drawRectangle(left + 129, top + 53, left + 177, top + 240);
+        do Screen.drawCircle(left + 152, top + 25, 24);
+        do Screen.setColor(true);
+
+        // Draw the next piece to come out in the circle at the top.
+        let x = left + 135;
+        let y = top + 13;
+        let type = queue.get(0);
+
+        if (type = 2) {
+            // minor adjustments to center I-type in the circle.
+            let x = x - 7;
+            let y = y - 6;
+        }
+        do drawNonGridPiece(x, y, queue.get(0));
+
+        // Draw the next 5 pieces in the queue in the box.
+        let x = left + 129;
+        let y = top + 54;
+        let i = 1;
+
+        while (i < 6) {
+            do drawNonGridPiece(x, y, queue.get(i));
+            let y = y + 36;
+            let i = i + 1;
+        }
         return;
     }
 
@@ -105,6 +143,7 @@ class Game {
         let matrix = Matrix.new();
         let continue = true;
         let locking = false;
+        do drawQueue();
 
         while (continue) {
             let continue = step();
@@ -132,6 +171,7 @@ class Game {
                 // game over.
                 return false;
             }
+            do drawQueue();
         }
 
         let i = 0;
@@ -251,6 +291,59 @@ class Game {
         do drawBlock(blocks[1], type);
         do drawBlock(blocks[2], type);
         do drawBlock(blocks[3], type);
+        return;
+    }
+
+    /** Draw a piece on an arbitrary location on the screen.
+     *
+     * The `x` and `y` argument should be the screen coordinates at the
+     * top-left of the piece's bounding box.
+     *
+     * The piece is always rendered in its spawn orientation.
+     */
+    method void drawNonGridPiece(int x, int y, int type) {
+        if (type = 1) { // O-type
+            do Block.draw(x + 12, y, type);
+            do Block.draw(x + 24, y, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+        }
+        if (type = 2) { // I-type
+            do Block.draw(x, y + 12, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+            do Block.draw(x + 36, y + 12, type);
+        }
+        if (type = 3) { // T-type
+            do Block.draw(x + 12, y, type);
+            do Block.draw(x, y + 12, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+        }
+        if (type = 4) { // L-type
+            do Block.draw(x + 24, y, type);
+            do Block.draw(x, y + 12, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+        }
+        if (type = 5) { // J-type
+            do Block.draw(x, y, type);
+            do Block.draw(x, y + 12, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+        }
+        if (type = 6) { // S-type
+            do Block.draw(x + 12, y, type);
+            do Block.draw(x + 24, y, type);
+            do Block.draw(x, y + 12, type);
+            do Block.draw(x + 12, y + 12, type);
+        }
+        if (type = 7) { // Z-type
+            do Block.draw(x, y, type);
+            do Block.draw(x + 12, y, type);
+            do Block.draw(x + 12, y + 12, type);
+            do Block.draw(x + 24, y + 12, type);
+        }
         return;
     }
 

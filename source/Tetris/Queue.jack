@@ -10,6 +10,9 @@ class Queue {
         return this;
     }
 
+    method int getLength() { return length; }
+    method int get(int index) { return array[index]; }
+
     /** Add another bag, if needed to keep at least 7 items in the queue. */
     method void extend() {
         var Array bag;
