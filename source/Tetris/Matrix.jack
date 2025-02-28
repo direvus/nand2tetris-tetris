@@ -357,12 +357,47 @@ class Matrix {
         let targetCells[2] = location + ROTATIONS[i + 2];
         let targetCells[3] = location + ROTATIONS[i + 3];
 
-        return isClear(
-                targetCells[0], targetCells[1],
-                targetCells[2], targetCells[3]);
-        // TODO: check whether rotation would hit a wall.
-
+        if (isTargetValid()) {
+            return true;
+        }
         return false;
+    }
+
+    /** Return whether the target cells are contiguous.
+     *
+     * This is used to detect when a proposed rotation would cross a wall
+     * boundary. When this happens, some target cells will "wrap" across to the
+     * other side of the matrix.
+     */
+    method boolean isTargetContiguous() {
+        var int i, x, minx, maxx;
+        let minx = 10;
+        let maxx = -1;
+        while (i < 4) {
+            let x = Util.mod(targetCells[i], WIDTH);
+            if (x < minx) {
+                let minx = x;
+            }
+            if (x > maxx) {
+                let maxx = x;
+            }
+            let i = i + 1;
+        }
+        /* The largest allowable distance between X coordinates is 3 (a
+         * horizontal I-type). Any more than that, and we must have wrapped
+         * across a wall boundary, so the position is not valid.
+         */
+        return ((maxx - minx) < 4);
+    }
+
+    /** Return whether the target cells describe a valid position. */
+    method boolean isTargetValid() {
+        if(~isClear(
+                targetCells[0], targetCells[1],
+                targetCells[2], targetCells[3])) {
+            return false;
+        }
+        return isTargetContiguous();
     }
 
     /** Commit the rotation previously set up by canRotate(). */
