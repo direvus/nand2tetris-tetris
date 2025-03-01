@@ -41,6 +41,7 @@ class Queue {
             let i = i + 1;
         }
         let length = length + 7;
+        do bag.dispose();
         return;
     }
 

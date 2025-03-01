@@ -1,14 +1,25 @@
 class Matrix {
-    field Array lockedCells, activeCells, targetCells, ROTATIONS, KICKS;
+    field Array lockedCells, activeCells, targetCells, completedLines,
+            ROTATIONS, KICKS;
     field int WIDTH, HEIGHT, location, activeType,
             orientation, targetOrientation;
 
     constructor Matrix new() {
+        var int i, size;
         let WIDTH = 10;
         let HEIGHT = 40;
-        let lockedCells = Array.new(WIDTH * HEIGHT);
+
+        let size = (WIDTH * HEIGHT);
+        let lockedCells = Array.new(size);
         let activeCells = Array.new(4);
         let targetCells = Array.new(4);
+        let completedLines = Array.new(4);
+        let activeType = 0;
+
+        while (i < size) {
+            let lockedCells[i] = 0;
+            let i = i + 1;
+        }
 
         do initRotations();
         do initKicks();
@@ -351,7 +362,7 @@ class Matrix {
         }
 
         /* Determine where the new minos should spawn and record these
-         * positions in targetCells. New pieces always spawn with orientation
+         * positions in activeCells. New pieces always spawn with orientation
          * 0.
          */
         let i = (type - 1) * 16;
@@ -564,20 +575,72 @@ class Matrix {
         return;
     }
 
-    /** Lock the active piece in place. */
-    method void lock() {
+    /** Lock the active piece in place.
+     *
+     * Return the number of lines that were completed by this lock-in.
+     */
+    method int lock() {
+        var Array rows;
+        var int i, j, row, count;
+        var boolean checked;
+        let rows = Array.new(4);
+
+        let completedLines[0] = -1;
+        let completedLines[1] = -1;
+        let completedLines[2] = -1;
+        let completedLines[3] = -1;
+
         let lockedCells[activeCells[0]] = activeType;
         let lockedCells[activeCells[1]] = activeType;
         let lockedCells[activeCells[2]] = activeType;
         let lockedCells[activeCells[3]] = activeType;
+
+        while (i < 4) {
+            let row = activeCells[i] / WIDTH;
+            let checked = false;
+            if (i > 0) {
+                let j = 0;
+                while (j < i) {
+                    if (rows[j] = row) {
+                        let checked = true;
+                    }
+                    let j = j + 1;
+                }
+            }
+            let rows[i] = row;
+
+            if (~checked) {
+                if (isRowComplete(row)) {
+                    let completedLines[count] = row;
+                    let count = count + 1;
+                }
+            }
+            let i = i + 1;
+        }
         let activeType = 0;
-        return;
+
+        do rows.dispose();
+        return count;
+    }
+
+    method boolean isRowComplete(int row) {
+        var int col, location;
+        let location = row * WIDTH;
+        while (col < WIDTH) {
+            if (lockedCells[location] = 0) {
+                return false;
+            }
+            let location = location + 1;
+            let col = col + 1;
+        }
+        return true;
     }
 
     method void dispose() {
         do activeCells.dispose();
         do targetCells.dispose();
         do lockedCells.dispose();
+        do completedLines.dispose();
         do ROTATIONS.dispose();
         do KICKS.dispose();
         do Memory.deAlloc(this);

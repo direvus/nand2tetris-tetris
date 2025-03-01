@@ -1,7 +1,8 @@
 class Game {
     field int left, top; // top-left coordinates of play area.
     field int width, height, maxRow; // dimensions of matrix grid.
-    field int entropy;
+    field int entropy, lines;
+    field String linesString;
     field boolean locking;
     field Queue queue;
     field Matrix matrix;
@@ -12,6 +13,7 @@ class Game {
         let width = 10;
         let height = 40;
         let maxRow = 19;
+        let linesString = String.new(6);
         do Random.init(1897);
         return this;
     }
@@ -65,18 +67,18 @@ class Game {
         do Logo.draw(166, 16);
 
         do Output.moveCursor(13, 1);
-        do Output.printString("Tetris (c) 1985-2025 Tetris Holding. Tetris logos, Tetris");
+        do Util.printString("Tetris (c) 1985-2025 Tetris Holding. Tetris logos, Tetris");
         do Output.moveCursor(14, 1);
-        do Output.printString("theme song and Tetriminos are trademarks of Tetris Holding. The");
+        do Util.printString("theme song and Tetriminos are trademarks of Tetris Holding. The");
         do Output.moveCursor(15, 1);
-        do Output.printString("Tetris trade dress is owned by Tetris Holding. Licensed to The");
+        do Util.printString("Tetris trade dress is owned by Tetris Holding. Licensed to The");
         do Output.moveCursor(16, 1);
-        do Output.printString("Tetris Company. Tetris Game Design by Alexey Pajitnov. Tetris");
+        do Util.printString("Tetris Company. Tetris Game Design by Alexey Pajitnov. Tetris");
         do Output.moveCursor(17, 1);
-        do Output.printString("Logo Design by Roger Dean. All Rights Reserved.");
+        do Util.printString("Logo Design by Roger Dean. All Rights Reserved.");
 
         do Output.moveCursor(20, 16);
-        do Output.printString("Press [SPACE] to start the game!");
+        do Util.printString("Press [SPACE] to start the game!");
         return;
     }
 
@@ -91,6 +93,10 @@ class Game {
         do Screen.drawCircle(left + 152, top + 25, 24);
 
         do Screen.setColor(true);
+
+        do Output.moveCursor(10, 2);
+        do Util.printString("Lines: ");
+        do Output.printInt(lines);
         return;
     }
 
@@ -138,15 +144,30 @@ class Game {
      */
     method int play() {
         var int score;
+        var int countdown;
         var boolean continue;
+
+        let continue = true;
+        let locking = false;
+        let score = 0;
+        let lines = 0;
 
         do Screen.clearScreen();
         do drawBackground();
         let queue = Queue.new();
         let matrix = Matrix.new();
-        let continue = true;
-        let locking = false;
         do drawQueue();
+
+        let countdown = 3;
+        while (countdown > 0) {
+            do Output.moveCursor(10, 32);
+            do Output.printInt(countdown);
+            do Sys.wait(1000);
+            let countdown = countdown - 1;
+        }
+        do Screen.setColor(false);
+        do Screen.drawRectangle(left, top, left + 120, top + 240);
+        do Screen.setColor(true);
 
         while (continue) {
             let continue = step();
@@ -174,6 +195,7 @@ class Game {
                 // game over.
                 return false;
             }
+            let locking = false;
             do drawQueue();
         }
 
@@ -252,7 +274,14 @@ class Game {
     }
 
     method void lockPiece() {
-        do matrix.lock();
+        var int cleared;
+        let cleared = matrix.lock();
+        let locking = false;
+
+        if (cleared > 0) {
+            let lines = lines + cleared;
+            do updateLines();
+        }
         // TODO: detect and clear complete lines
         return;
     }
@@ -350,7 +379,22 @@ class Game {
         return;
     }
 
+    /** Update the lines cleared counter. */
+    method void updateLines() {
+        do Output.moveCursor(10, 9);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(72, 100, 120, 110);
+        do Screen.setColor(true);
+        do Output.moveCursor(10, 9);
+        do linesString.setInt(lines);
+        do Output.printString(linesString);
+        return;
+    }
+
     method void dispose() {
+        do linesString.dispose();
+        do queue.dispose();
+        do matrix.dispose();
         do Memory.deAlloc(this);
         return;
     }

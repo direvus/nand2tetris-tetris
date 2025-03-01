@@ -5,4 +5,10 @@ class Util {
         let quotient = a / b;
         return a - (b * quotient);
     }
+
+    function void printString(String str) {
+        do Output.printString(str);
+        do str.dispose();
+        return;
+    }
 }
