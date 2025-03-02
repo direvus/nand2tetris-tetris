@@ -280,9 +280,51 @@ class Game {
 
         if (cleared > 0) {
             let lines = lines + cleared;
-            do updateLines();
+            do updateLinesCounter();
+            do clearLines();
         }
-        // TODO: detect and clear complete lines
+        return;
+    }
+
+    method void clearLines() {
+        var int i, y, row, minRow;
+        var Array lines, blocks;
+
+        let minRow = 999;
+        let lines = matrix.getCompletedLines();
+        do Screen.setColor(false);
+
+        // First, erase the completed lines.
+        while (i < 4) {
+            let row = lines[i];
+            if (row > -1) {
+                do eraseLine(row);
+                if (row < minRow) {
+                    let minRow = row;
+                }
+            }
+            let i = i + 1;
+        }
+        do Sys.wait(1000);
+
+        // Now erase the whole grid area from the lowest completed line to the
+        // top.
+        let y = top + ((maxRow - minRow) * 12);
+        do Screen.drawRectangle(left, top, left + (12 * width), y + 12);
+
+        // Update the matrix
+        do matrix.clearLines();
+
+        // Redraw any blocks that dropped as a result
+        do Screen.setColor(true);
+        let i = minRow * width;
+        let blocks = matrix.getLockedCells();
+        while (i < (width * height)) {
+            if (blocks[i] > 0) {
+                do drawBlock(i, blocks[i]);
+            }
+            let i = i + 1;
+        }
         return;
     }
 
@@ -303,6 +345,21 @@ class Game {
         do eraseBlock(blocks[1]);
         do eraseBlock(blocks[2]);
         do eraseBlock(blocks[3]);
+        return;
+    }
+
+    /** Erase an entire row of blocks.
+     *
+     * This method assumes the screen color has already been set to false, and
+     * doesn't set it back to true after erasing.
+     */
+    method void eraseLine(int row) {
+        var int y;
+        if (row > maxRow) {
+            return;
+        }
+        let y = top + ((maxRow - row) * 12);
+        do Screen.drawRectangle(left, y, left + (12 * width), y + 12);
         return;
     }
 
@@ -380,7 +437,7 @@ class Game {
     }
 
     /** Update the lines cleared counter. */
-    method void updateLines() {
+    method void updateLinesCounter() {
         do Output.moveCursor(10, 9);
         do Screen.setColor(false);
         do Screen.drawRectangle(72, 100, 120, 110);

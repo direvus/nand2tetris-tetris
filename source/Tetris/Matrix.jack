@@ -335,13 +335,10 @@ class Matrix {
         return (row * WIDTH) + column;
     }
 
-    method int getActiveType() {
-        return activeType;
-    }
-
-    method Array getActiveCells() {
-        return activeCells;
-    }
+    method int getActiveType() { return activeType; }
+    method Array getActiveCells() { return activeCells; }
+    method Array getLockedCells() { return lockedCells; }
+    method Array getCompletedLines() { return completedLines; }
 
     /** Add a new Tetrimino to the matrix and return whether successful.
      *
@@ -621,6 +618,52 @@ class Matrix {
 
         do rows.dispose();
         return count;
+    }
+
+    /** Remove any lines that are completed.
+     *
+     * Any blocks above the cleared lines will fall down to fill the cleared
+     * space.
+     */
+    method void clearLines() {
+        var int i, count, row, col, offset;
+
+        while (row < HEIGHT) {
+            if (Util.arrayContains(completedLines, 4, row)) {
+                let count = count + 1;
+                let row = row + 1;
+                let i = i + WIDTH;
+            } else {
+                if (count > 0) {
+                    // Copy the blocks down by the number of cleared rows we've
+                    // seen so far.
+                    let offset = (count * WIDTH);
+                    let col = 0;
+                    while (col < WIDTH) {
+                        let lockedCells[i - offset] = lockedCells[i];
+                        let col = col + 1;
+                        let i = i + 1;
+                    }
+                } else {
+                    // Skip this row, we haven't seen any cleared rows yet.
+                    let i = i + WIDTH;
+                }
+                let row = row + 1;
+            }
+        }
+        // Finally, clear out all blocks from the top `count` rows.
+        let row = HEIGHT - count;
+        let i = row * WIDTH;
+        while (row < HEIGHT) {
+            let col = 0;
+            while (col < WIDTH) {
+                let lockedCells[i] = 0;
+                let col = col + 1;
+                let i = i + 1;
+            }
+            let row = row + 1;
+        }
+        return;
     }
 
     method boolean isRowComplete(int row) {

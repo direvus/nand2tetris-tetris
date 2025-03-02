@@ -11,4 +11,54 @@ class Util {
         do str.dispose();
         return;
     }
+
+    /** Sort an array in-place. */
+    function void sort(Array a, int length) {
+        // Use a simple bubble sort -- continue to run passes until a pass
+        // completes without making any swaps.
+        while (true) {
+            if (Util.sortPass(a, length) = 0) {
+                return;
+            }
+        }
+        return;
+    }
+
+    /** Perform one sorting pass on an array.
+     *
+     * The adjacent elements of the array are swapped in-place, if they are in
+     * the wrong order.
+     *
+     * Return the number of swaps made.
+     */
+    function int sortPass(Array a, int length) {
+        var int i, temp, count;
+        let i = 1;
+        while (i < length) {
+            if (a[i - 1] < a[i]) {
+                let temp = a[i - 1];
+                let a[i - 1] = a[i];
+                let a[i] = temp;
+                let count = count + 1;
+            }
+            let i = i + 1;
+        }
+        return count;
+    }
+
+    /** Return whether an array contains `value`.
+     * 
+     * Return true if `value` is present in any of the array's first `length`
+     * elements, and false otherwise.
+     */
+    function boolean arrayContains(Array a, int length, int value) {
+        var int i;
+        while (i < length) {
+            if (a[i] = value) {
+                return true;
+            }
+            let i = i + 1;
+        }
+        return false;
+    }
 }
