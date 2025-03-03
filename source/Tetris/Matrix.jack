@@ -426,7 +426,7 @@ class Matrix {
                 (Util.mod(activeCells[3], WIDTH) = wall)) {
             return false;
         }
-        return canMove(-1);
+        return canMove(1);
     }
 
     /** Return whether the active piece has space to drop down. */

@@ -241,7 +241,7 @@ class Game {
                     do Sys.wait(20);
                 }
                 do lockPiece();
-                do Sys.wait(100);
+                do Sys.wait(10);
                 return true;
             }
             // TODO: soft drop
