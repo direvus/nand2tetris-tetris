@@ -12,6 +12,27 @@ class Util {
         return;
     }
 
+    function void printRightInt(int value) {
+        var String s, pad;
+        var int i;
+
+        let s = String.new(6);
+        let pad = String.new(5);
+        do s.setInt(value);
+
+        let i = 0;
+        while (i < (6 - s.length())) {
+            do pad.appendChar(32);
+            let i = i + 1;
+        }
+
+        do Util.printString(pad);
+        do Util.printString(s);
+        do pad.dispose();
+        do s.dispose();
+        return;
+    }
+
     /** Sort an array in-place. */
     function void sort(Array a, int length) {
         // Use a simple bubble sort -- continue to run passes until a pass
