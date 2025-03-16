@@ -249,7 +249,6 @@ class Game {
                 do Sys.wait(10);
                 return true;
             }
-            // TODO: soft drop
             if (~(move = 0)) {
                 let piece = matrix.getActiveCells();
                 do erasePiece(piece);
@@ -257,11 +256,21 @@ class Game {
                 let piece = matrix.getActiveCells();
                 do drawPiece(piece, type);
             }
-            do Sys.wait(100);
+            if (key = 133) {
+                // Down arrow: Soft Drop -- speed up the cycle by 20x
+                do Sys.wait(5);
+            } else {
+                do Sys.wait(100);
+            }
             let i = i + 1;
         }
 
         if (matrix.canDrop()) {
+            if (key = 133) {
+                // During a Soft Drop, award 1 point per line the piece falls.
+                let points = points + 1;
+                do updatePointsCounter();
+            }
             let locking = false;
             let piece = matrix.getActiveCells();
             do erasePiece(piece);
