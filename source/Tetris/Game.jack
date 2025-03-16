@@ -1,7 +1,7 @@
 class Game {
     field int left, top; // top-left coordinates of play area.
     field int width, height, maxRow; // dimensions of matrix grid.
-    field int entropy, level, lines, points;
+    field int entropy, level, lines, points, hold;
     field boolean locking;
     field Queue queue;
     field Matrix matrix;
@@ -84,11 +84,13 @@ class Game {
         do Screen.drawRectangle(left - 1, top - 1, left + 121, top + 241);
         do Screen.drawRectangle(left + 128, top + 52, left + 178, top + 241);
         do Screen.drawCircle(left + 152, top + 25, 25);
+        do Screen.drawCircle(left - 32, top + 25, 25);
 
         do Screen.setColor(false);
         do Screen.drawRectangle(left, top, left + 120, top + 240);
         do Screen.drawRectangle(left + 129, top + 53, left + 177, top + 240);
         do Screen.drawCircle(left + 152, top + 25, 24);
+        do Screen.drawCircle(left - 32, top + 25, 24);
 
         do Screen.setColor(true);
 
@@ -153,6 +155,7 @@ class Game {
         let points = 0;
         let lines = 0;
         let level = 1;
+        let hold = 0;
 
         do Screen.clearScreen();
         do drawBackground();
@@ -215,6 +218,33 @@ class Game {
                 if (matrix.canMoveRight()) {
                     let move = 1;
                 }
+            }
+            if ((key = 67) | (key = 99)) { // C or c
+                // Swap the active piece into the hold slot
+                do erasePiece(matrix.getActiveCells());
+                if (hold > 0) {
+                    /* If there's a piece in the hold slot already, spawn it
+                     * into the matrix.
+                     */
+                    if (~matrix.addPiece(hold)) {
+                        // Unable to spawn; game over.
+                        return false;
+                    }
+                } else {
+                    /* Otherwise, draw a new piece from the queue and try to
+                     * spawn it.
+                     */
+                    if (~matrix.addPiece(queue.pop())) {
+                        // Unable to spawn; game over.
+                        return false;
+                    }
+                    do drawQueue();
+                }
+                let locking = false;
+                let hold = type;
+                let type = matrix.getActiveType();
+                do drawPiece(matrix.getActiveCells(), type);
+                do updateHoldSlot();
             }
             if ((key = 88) | (key = 120)) { // X or x
                 if (matrix.prepareRotate(true)) {
@@ -464,6 +494,35 @@ class Game {
             do Block.draw(x + 12, y + 12, type);
             do Block.draw(x + 24, y + 12, type);
         }
+        return;
+    }
+
+    /** Update the hold slot. */
+    method void updateHoldSlot() {
+        var int x, y;
+
+        // First, clear out the hold slot space.
+        do Screen.setColor(false);
+        do Screen.drawCircle(left - 32, top + 25, 24);
+
+        // Then draw the held piece (if there is one).
+        do Screen.setColor(true);
+        if (hold = 0) {
+            return;
+        }
+
+        let x = left - 49;
+        let y = top + 13;
+
+        // Minor adjustments to center pieces in the circle.
+        if (hold = 1) {
+            let x = x - 7;
+        }
+        if (hold = 2) {
+            let x = x - 7;
+            let y = y - 6;
+        }
+        do drawNonGridPiece(x, y, hold);
         return;
     }
 
